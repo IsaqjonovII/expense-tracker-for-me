@@ -10,19 +10,28 @@ import {
 import { db } from '../firebase.js'
 import { format, subDays, startOfMonth, eachDayOfInterval } from 'date-fns'
 
+import { useUser } from './useUser.js'
+
 const expenses = ref([])
 let unsubscribe = null
 
 export function useExpenses() {
+    const { currentUser } = useUser()
     const today = format(new Date(), 'yyyy-MM-dd')
     const monthStart = format(startOfMonth(new Date()), 'yyyy-MM-dd')
 
     // Subscribe to expenses from the start of the month
     function subscribe() {
-        if (unsubscribe) return
+        if (unsubscribe) unsubscribe() // Always reset on re-subscribe in case user changed
+
+        if (!currentUser.value) {
+            expenses.value = []
+            return
+        }
 
         const q = query(
             collection(db, 'expenses'),
+            where('username', '==', currentUser.value),
             where('date', '>=', monthStart),
             orderBy('date', 'asc')
         )
@@ -106,8 +115,10 @@ export function useExpenses() {
 
     // Save expense
     async function saveExpense(date, items) {
+        if (!currentUser.value) return
         const total = items.reduce((sum, i) => sum + Number(i.price), 0)
         await addDoc(collection(db, 'expenses'), {
+            username: currentUser.value,
             date,
             items: items.map((i) => ({ name: i.name, price: Number(i.price) })),
             total

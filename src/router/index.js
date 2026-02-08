@@ -17,12 +17,28 @@ const routes = [
         path: '/create',
         name: 'create',
         component: CreateView
+    },
+    {
+        path: '/login',
+        name: 'login',
+        component: () => import('../views/LoginView.vue')
     }
 ]
 
 const router = createRouter({
     history: createWebHistory(),
     routes
+})
+
+import { useUser } from '../composables/useUser.js'
+
+router.beforeEach((to, from, next) => {
+    const { currentUser } = useUser()
+    if (to.name !== 'login' && !currentUser.value) {
+        next({ name: 'login' })
+    } else {
+        next()
+    }
 })
 
 export default router

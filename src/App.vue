@@ -1,12 +1,13 @@
 <script setup>
+import { useRoute } from 'vue-router'
 import BottomNav from './components/BottomNav.vue'
+
+const route = useRoute()
 </script>
 
 <template>
-  <div class="app-shell">
-    <router-view />
-    <BottomNav />
-  </div>
+  <router-view></router-view>
+  <BottomNav v-if="route.name !== 'login'" />
 </template>
 
 <style scoped>
