@@ -33,104 +33,123 @@ function handleLogout() {
 
 <template>
   <div class="home-view">
-    <header class="dashboard-header">
-      <div>
-        <h1 class="page-title">Dashboard</h1>
-        <p class="page-subtitle">{{ currentUser }}'s spending overview</p>
+    <header class="sticky-header">
+      <div class="header-content">
+        <div>
+          <h1 class="page-title">Dashboard</h1>
+          <p class="page-subtitle">{{ currentUser }}'s spending overview</p>
+        </div>
+        <button class="logout-btn" @click="handleLogout" title="Logout">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+            <polyline points="16 17 21 12 16 7"></polyline>
+            <line x1="21" y1="12" x2="9" y2="12"></line>
+          </svg>
+        </button>
       </div>
-      <button class="logout-btn" @click="handleLogout" title="Logout">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
-          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
-          <polyline points="16 17 21 12 16 7"></polyline>
-          <line x1="21" y1="12" x2="9" y2="12"></line>
-        </svg>
-      </button>
     </header>
 
-    <section class="stats-grid">
-      <StatCard
-        label="Spent Today"
-        :value="totalToday"
-        icon="📅"
-      />
-      <StatCard
-        label="This Month"
-        :value="totalMonth"
-        icon="💰"
-      />
-      <StatCard
-        label="Daily Average"
-        :value="avgPerDay"
-        icon="📊"
-      />
-    </section>
+    <div class="view-content">
+      <section class="stats-grid">
+        <StatCard
+          label="Spent Today"
+          :value="totalToday"
+          icon="📅"
+        />
+        <StatCard
+          label="This Month"
+          :value="totalMonth"
+          icon="💰"
+        />
+        <StatCard
+          label="Daily Average"
+          :value="avgPerDay"
+          icon="📊"
+        />
+      </section>
 
-    <section class="chart-section">
-      <div class="chart-toggle">
-        <button
-          :class="{ active: chartView === '7' }"
-          @click="chartView = '7'"
-        >
-          7 Days
-        </button>
-        <button
-          :class="{ active: chartView === '30' }"
-          @click="chartView = '30'"
-        >
-          30 Days
-        </button>
-      </div>
+      <section class="chart-section">
+        <div class="chart-toggle">
+          <button
+            :class="{ active: chartView === '7' }"
+            @click="chartView = '7'"
+          >
+            7 Days
+          </button>
+          <button
+            :class="{ active: chartView === '30' }"
+            @click="chartView = '30'"
+          >
+            30 Days
+          </button>
+        </div>
 
-      <ExpenseChart
-        v-if="chartView === '7'"
-        :labels="chartData7.labels"
-        :data="chartData7.data"
-        title="Last 7 Days"
-      />
-      <ExpenseChart
-        v-else
-        :labels="chartData30.labels"
-        :data="chartData30.data"
-        title="Last 30 Days"
-      />
-    </section>
+        <ExpenseChart
+          v-if="chartView === '7'"
+          :labels="chartData7.labels"
+          :data="chartData7.data"
+          title="Last 7 Days"
+        />
+        <ExpenseChart
+          v-else
+          :labels="chartData30.labels"
+          :data="chartData30.data"
+          title="Last 30 Days"
+        />
+      </section>
+    </div>
   </div>
 </template>
 
 <style scoped>
 .home-view {
-  padding: calc(20px + var(--sat, 0px)) 16px calc(100px + var(--sab, 0px));
   max-width: 480px;
   margin: 0 auto;
+  min-height: 100%;
 }
 
-.dashboard-header {
+.sticky-header {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: rgba(15, 23, 42, 0.85);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  padding: calc(16px + var(--sat, 20px)) 16px 16px;
+}
+
+.header-content {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 24px;
+}
+
+.view-content {
+  padding: 24px 16px calc(120px + var(--sab, 0px));
 }
 
 .page-title {
-  font-size: 28px;
+  font-size: 24px;
   font-weight: 800;
   color: var(--text-primary);
   margin: 0;
   letter-spacing: -0.03em;
+  line-height: 1.1;
 }
 
 .page-subtitle {
-  font-size: 14px;
+  font-size: 13px;
   color: var(--text-secondary);
-  margin: 4px 0 0;
+  margin: 2px 0 0;
   text-transform: capitalize;
 }
 
 .logout-btn {
-  background: transparent;
+  background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.1);
-  width: 40px;
-  height: 40px;
+  width: 38px;
+  height: 38px;
   border-radius: 12px;
   display: flex;
   align-items: center;
@@ -166,6 +185,7 @@ function handleLogout() {
   padding: 4px;
   border: 1px solid var(--border);
 }
+
 
 .chart-toggle button {
   flex: 1;
