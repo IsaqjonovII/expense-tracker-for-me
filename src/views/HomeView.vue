@@ -99,7 +99,7 @@ function handleLogout() {
 
 <style scoped>
 .home-view {
-  padding: 20px 16px 100px;
+  padding: calc(20px + var(--sat, 0px)) 16px calc(100px + var(--sab, 0px));
   max-width: 480px;
   margin: 0 auto;
 }

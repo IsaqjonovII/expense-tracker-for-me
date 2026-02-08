@@ -13,6 +13,12 @@
   --text-secondary: #94a3b8;
   --text-tertiary: #64748b;
   --danger: #ef4444;
+
+  /* Safe Areas for Mobile/Telegram */
+  --sat: env(safe-area-inset-top);
+  --sab: env(safe-area-inset-bottom);
+  --sar: env(safe-area-inset-right);
+  --sal: env(safe-area-inset-left);
 }
 
 *,

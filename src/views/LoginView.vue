@@ -1,11 +1,25 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useUser } from '../composables/useUser.js'
 
 const username = ref('')
 const router = useRouter()
 const { login } = useUser()
+
+onMounted(() => {
+  // Try to get username from Telegram WebApp
+  if (window.Telegram && window.Telegram.WebApp) {
+    const tgUser = window.Telegram.WebApp.initDataUnsafe?.user
+    if (tgUser && tgUser.username) {
+      username.value = tgUser.username
+      // If we got a username, maybe we should auto-login too?
+      // Let's just pre-fill for now so the user can see it.
+    }
+    // Also expand the app to full height in Telegram
+    window.Telegram.WebApp.expand()
+  }
+})
 
 function handleLogin() {
   if (username.value.trim()) {
@@ -52,7 +66,7 @@ function handleLogin() {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 20px;
+  padding: calc(20px + var(--sat, 0px)) 16px calc(20px + var(--sab, 0px));
   background: var(--bg);
 }
 

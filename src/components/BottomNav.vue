@@ -27,7 +27,7 @@
 <style scoped>
 .bottom-nav {
   position: fixed;
-  bottom: 24px;
+  bottom: calc(24px + var(--sab, 0px));
   left: 50%;
   transform: translateX(-50%);
   width: calc(100% - 32px);

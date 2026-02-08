@@ -196,7 +196,7 @@ function updatePrice(event, index) {
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-  padding: 12px 16px;
+  padding: calc(12px + var(--sat, 0px)) 16px 12px;
 }
 
 .header-content {
@@ -359,6 +359,7 @@ function updatePrice(event, index) {
   color: var(--text-primary);
   outline: none;
   box-sizing: border-box;
+  appearance: none;
   -moz-appearance: textfield;
 }
 
@@ -408,7 +409,7 @@ function updatePrice(event, index) {
 /* Sticky Footer */
 .sticky-footer {
   position: fixed;
-  bottom: 100px; /* Above floating nav */
+  bottom: calc(100px + var(--sab, 0px)); /* Above floating nav & safe area */
   left: 50%;
   transform: translateX(-50%);
   width: calc(100% - 32px);

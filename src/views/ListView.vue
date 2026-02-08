@@ -68,7 +68,7 @@ const confirmDelete = async (id) => {
 
 <style scoped>
 .list-view {
-  padding: 24px 16px 140px;
+  padding: calc(24px + var(--sat, 0px)) 16px calc(140px + var(--sab, 0px));
   max-width: 480px;
   margin: 0 auto;
 }
