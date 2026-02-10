@@ -13,6 +13,7 @@ import { format, subDays, startOfMonth, eachDayOfInterval } from 'date-fns'
 import { useUser } from './useUser.js'
 
 const expenses = ref([])
+const isLoading = ref(true)
 let unsubscribe = null
 
 export function useExpenses() {
@@ -26,8 +27,11 @@ export function useExpenses() {
 
         if (!currentUser.value) {
             expenses.value = []
+            isLoading.value = false
             return
         }
+
+        isLoading.value = true
 
         const q = query(
             collection(db, 'expenses'),
@@ -41,6 +45,10 @@ export function useExpenses() {
                 id: doc.id,
                 ...doc.data()
             }))
+            isLoading.value = false
+        }, (error) => {
+            console.error(error)
+            isLoading.value = false
         })
     }
 
@@ -113,12 +121,35 @@ export function useExpenses() {
             }))
     })
 
-    // Save expense
+    // Get single expense
+    async function getExpense(id) {
+        const { doc, getDoc } = await import('firebase/firestore')
+        const snap = await getDoc(doc(db, 'expenses', id))
+        if (snap.exists()) {
+            return { id: snap.id, ...snap.data() }
+        }
+        return null
+    }
+
+    // Save expense (create)
     async function saveExpense(date, items) {
         if (!currentUser.value) return
         const total = items.reduce((sum, i) => sum + Number(i.price), 0)
         await addDoc(collection(db, 'expenses'), {
             username: currentUser.value,
+            date,
+            items: items.map((i) => ({ name: i.name, price: Number(i.price) })),
+            total
+        })
+    }
+
+    // Update expense
+    async function updateExpense(id, date, items) {
+        if (!currentUser.value) return
+        const { doc, updateDoc } = await import('firebase/firestore')
+        const total = items.reduce((sum, i) => sum + Number(i.price), 0)
+
+        await updateDoc(doc(db, 'expenses', id), {
             date,
             items: items.map((i) => ({ name: i.name, price: Number(i.price) })),
             total
@@ -133,6 +164,7 @@ export function useExpenses() {
 
     return {
         expenses,
+        isLoading,
         subscribe,
         cleanup,
         totalToday,
@@ -142,6 +174,8 @@ export function useExpenses() {
         chartData30,
         groupedExpenses,
         saveExpense,
+        updateExpense,
+        getExpense,
         deleteExpense
     }
 }

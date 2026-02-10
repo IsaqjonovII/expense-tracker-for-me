@@ -13,7 +13,8 @@ const {
   totalMonth,
   avgPerDay,
   chartData7,
-  chartData30
+  chartData30,
+  isLoading
 } = useExpenses()
 
 const chartView = ref('7')
@@ -55,16 +56,19 @@ function handleLogout() {
           label="Spent Today"
           :value="totalToday"
           icon="📅"
+          :loading="isLoading"
         />
         <StatCard
           label="This Month"
           :value="totalMonth"
           icon="💰"
+          :loading="isLoading"
         />
         <StatCard
           label="Daily Average"
           :value="avgPerDay"
           icon="📊"
+          :loading="isLoading"
         />
       </section>
 
@@ -84,18 +88,22 @@ function handleLogout() {
           </button>
         </div>
 
-        <ExpenseChart
-          v-if="chartView === '7'"
-          :labels="chartData7.labels"
-          :data="chartData7.data"
-          title="Last 7 Days"
-        />
-        <ExpenseChart
-          v-else
-          :labels="chartData30.labels"
-          :data="chartData30.data"
-          title="Last 30 Days"
-        />
+        <div v-if="isLoading" class="skeleton" style="height: 250px; border-radius: 20px;"></div>
+        
+        <template v-else>
+          <ExpenseChart
+            v-if="chartView === '7'"
+            :labels="chartData7.labels"
+            :data="chartData7.data"
+            title="Last 7 Days"
+          />
+          <ExpenseChart
+            v-else
+            :labels="chartData30.labels"
+            :data="chartData30.data"
+            title="Last 30 Days"
+          />
+        </template>
       </section>
     </div>
   </div>
@@ -106,6 +114,7 @@ function handleLogout() {
   max-width: 480px;
   margin: 0 auto;
   min-height: 100%;
+ width: 100%; 
 }
 
 .sticky-header {
@@ -126,6 +135,7 @@ function handleLogout() {
 }
 
 .view-content {
+ width: 100%; 
   padding: 24px 16px calc(120px + var(--sab, 0px));
 }
 

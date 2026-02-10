@@ -19,6 +19,11 @@ const routes = [
         component: CreateView
     },
     {
+        path: '/edit/:id',
+        name: 'edit',
+        component: CreateView
+    },
+    {
         path: '/login',
         name: 'login',
         component: () => import('../views/LoginView.vue')

@@ -1,15 +1,17 @@
 <script setup>
-import { ref, nextTick, computed } from 'vue'
-import { useRouter } from 'vue-router'
+import { ref, nextTick, computed, onMounted } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
 import { useExpenses } from '../composables/useExpenses.js'
 import { format } from 'date-fns'
 
 const router = useRouter()
-const { saveExpense } = useExpenses()
+const route = useRoute()
+const { saveExpense, updateExpense, getExpense } = useExpenses()
+const isEditMode = computed(() => !!route.params.id)
 
 const selectedDate = ref(format(new Date(), 'yyyy-MM-dd'))
 const itemsText = ref('')
-const step = ref(1) // 1 = input items, 2 = input prices
+const step = ref(isEditMode.value ? 2 : 1)
 const items = ref([])
 const saving = ref(false)
 const priceInputs = ref([])
@@ -62,12 +64,18 @@ async function handleSave() {
   saving.value = true
 
   try {
-    await saveExpense(selectedDate.value, items.value)
-    // Reset
-    step.value = 1
-    itemsText.value = ''
-    items.value = []
-    router.push('/')
+    if (isEditMode.value) {
+      await updateExpense(route.params.id, selectedDate.value, items.value)
+      // Go back to history
+      router.push('/list')
+    } else {
+      await saveExpense(selectedDate.value, items.value)
+      // Reset
+      step.value = 1
+      itemsText.value = ''
+      items.value = []
+      router.push('/')
+    }
   } catch (err) {
     console.error('Save error:', err)
     alert('Failed to save. Check console for details.')
@@ -77,7 +85,11 @@ async function handleSave() {
 }
 
 function goBack() {
-  step.value = 1
+  if (isEditMode.value) {
+    router.push('/list')
+  } else {
+    step.value = 1
+  }
 }
 
 function formatInput(value) {
@@ -89,6 +101,28 @@ function updatePrice(event, index) {
   const rawValue = event.target.value.replace(/[^0-9.]/g, '')
   items.value[index].price = rawValue === '' ? '' : parseFloat(rawValue)
 }
+
+onMounted(async () => {
+  if (isEditMode.value) {
+    const id = route.params.id
+    const expense = await getExpense(id)
+    if (expense) {
+      selectedDate.value = expense.date
+      items.value = expense.items.map(i => ({
+        name: i.name,
+        price: i.price
+      }))
+      // In edit mode, we can start at step 2 (prices) or 1 (items).
+      // Since items are already parsed, step 2 makes sense, but user might want to edit items list.
+      // Let's go to step 1 but prefill the text so they can see/edit items easily.
+      itemsText.value = items.value.map(i => i.name).join(', ')
+      step.value = 2
+    } else {
+      alert('Expense not found')
+      router.push('/')
+    }
+  }
+})
 </script>
 
 <template>
@@ -97,13 +131,13 @@ function updatePrice(event, index) {
     <header class="sticky-header">
       <div class="header-content">
         <div class="header-left">
-          <button v-if="step === 2" class="back-btn" @click="goBack">
+          <button v-if="step === 2 || isEditMode" class="back-btn" @click="goBack">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="24" height="24">
               <polyline points="15 18 9 12 15 6"/>
             </svg>
           </button>
           <h1 class="page-title">
-            {{ step === 1 ? 'New Expense' : 'Set Prices' }}
+            {{ isEditMode ? 'Edit Expense' : (step === 1 ? 'New Expense' : 'Set Prices') }}
           </h1>
         </div>
         <div class="date-picker-wrapper">
@@ -173,7 +207,7 @@ function updatePrice(event, index) {
           @click="handleSave"
         >
           <span v-if="saving" class="spinner"></span>
-          <span v-else>Save Expense</span>
+          <span v-else>{{ isEditMode ? 'Update Expense' : 'Save Expense' }}</span>
         </button>
       </div>
     </div>
@@ -185,6 +219,7 @@ function updatePrice(event, index) {
   padding-bottom: 80px;
   max-width: 480px;
   margin: 0 auto;
+ width: 100%; 
 }
 
 /* Sticky Header */
